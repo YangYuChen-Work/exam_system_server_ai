@@ -1,0 +1,25 @@
+:root {
+  --primary-color: #165DFF; /* 字节跳动/Arco 风格蓝 */
+  --bg-color: #F2F3F5;      /* 高级灰背景 */
+  --text-main: #1D2129;
+  --text-sub: #4E5969;
+  --card-bg: #FFFFFF;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  font-family: 'PingFang SC', 'Helvetica Neue', Helvetica, 'microsoft yahei', arial, sans-serif;
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* 动画类 */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }

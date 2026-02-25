@@ -1,0 +1,182 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "🎓 智能考试系统API文档",
+    "description": "📚 智能考试系统后端接口文档，提供完整的RESTful API服务\n\n✨ 主要功能模块：\n• 🧠 题目管理：支持选择题、判断题、简答题的增删改查\n• 📝 试卷管理：手动组卷和AI智能组卷\n• 🎨 轮播图管理：首页轮播图的图片上传和管理\n• 📊 考试记录：考试结果统计和分析\n• 🔔 公告管理：系统公告的发布和管理",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "数据统计",
+      "description": "系统统计相关操作，包括概览数据、图表统计等功能"
+    }
+  ],
+  "paths": {
+    "/files/**": {
+      "get": {
+        "tags": [
+          "file-controller"
+        ],
+        "operationId": "getFile",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/stats/test": {
+      "get": {
+        "tags": [
+          "数据统计"
+        ],
+        "summary": "测试数据库连接",
+        "description": "测试系统数据库连接状态，用于系统健康检查",
+        "operationId": "testDatabase",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats/overview": {
+      "get": {
+        "tags": [
+          "数据统计"
+        ],
+        "summary": "获取系统概览统计",
+        "description": "获取系统的概览统计数据，包括题目、用户、考试等各项数量统计",
+        "operationId": "getSystemStats",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStatsVo"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ResultString": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "string",
+            "description": "响应数据，具体的业务数据内容"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultStatsVo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/StatsVo"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "StatsVo": {
+        "type": "object",
+        "properties": {
+          "questionCount": {
+            "type": "integer",
+            "description": "题目总数",
+            "format": "int64",
+            "example": 150
+          },
+          "userCount": {
+            "type": "integer",
+            "description": "用户总数",
+            "format": "int64",
+            "example": 50
+          },
+          "examCount": {
+            "type": "integer",
+            "description": "考试总场次",
+            "format": "int64",
+            "example": 25
+          },
+          "todayExamCount": {
+            "type": "integer",
+            "description": "今日考试次数",
+            "format": "int64",
+            "example": 5
+          },
+          "categoryCount": {
+            "type": "integer",
+            "description": "分类总数",
+            "format": "int64",
+            "example": 8
+          },
+          "paperCount": {
+            "type": "integer",
+            "description": "试卷总数",
+            "format": "int64",
+            "example": 12
+          }
+        },
+        "description": "系统统计数据"
+      }
+    }
+  }
+}

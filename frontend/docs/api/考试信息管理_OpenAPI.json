@@ -1,0 +1,1588 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "🎓 智能考试系统API文档",
+    "description": "📚 智能考试系统后端接口文档，提供完整的RESTful API服务\n\n✨ 主要功能模块：\n• 🧠 题目管理：支持选择题、判断题、简答题的增删改查\n• 📝 试卷管理：手动组卷和AI智能组卷\n• 🎨 轮播图管理：首页轮播图的图片上传和管理\n• 📊 考试记录：考试结果统计和分析\n• 🔔 公告管理：系统公告的发布和管理",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "考试管理",
+      "description": "考试流程相关操作，包括开始考试、答题提交、AI批阅、成绩查询等功能"
+    },
+    {
+      "name": "试卷管理",
+      "description": "试卷相关操作，包括创建、查询、更新、删除，以及AI智能组卷功能"
+    },
+    {
+      "name": "考试记录管理",
+      "description": "考试记录相关操作，包括记录查询、成绩管理、排行榜展示等功能"
+    }
+  ],
+  "paths": {
+    "/api/papers/{id}": {
+      "get": {
+        "tags": [
+          "试卷管理"
+        ],
+        "summary": "获取试卷详情",
+        "description": "获取试卷的详细信息，包括试卷基本信息和包含的所有题目",
+        "operationId": "getPaperById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "试卷ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultPaper"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "试卷管理"
+        ],
+        "summary": "更新试卷信息",
+        "description": "更新试卷的基本信息和题目配置",
+        "operationId": "updatePaper",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "试卷ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaperVo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultPaper"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "试卷管理"
+        ],
+        "summary": "删除试卷",
+        "description": "删除指定的试卷，注意：已发布的试卷不能删除",
+        "operationId": "deletePaper",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "试卷ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/papers": {
+      "post": {
+        "tags": [
+          "试卷管理"
+        ],
+        "summary": "手动创建试卷",
+        "description": "通过手动选择题目的方式创建试卷",
+        "operationId": "createPaper",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaperVo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultPaper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/papers/{id}/status": {
+      "post": {
+        "tags": [
+          "试卷管理"
+        ],
+        "summary": "更新试卷状态",
+        "description": "修改试卷状态：发布试卷供学生考试或停止试卷禁止考试",
+        "operationId": "updatePaperStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "试卷ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "新的状态，可选值：PUBLISHED/STOPPED",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/papers/ai": {
+      "post": {
+        "tags": [
+          "试卷管理"
+        ],
+        "summary": "AI智能组卷",
+        "description": "基于设定的规则（题型分布、难度配比等）使用AI自动生成试卷",
+        "operationId": "createPaperWithAI",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiPaperVo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultPaper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exams/{examRecordId}/submit": {
+      "post": {
+        "tags": [
+          "考试管理"
+        ],
+        "summary": "提交考试答案",
+        "description": "学生提交考试答案，系统记录答题情况",
+        "operationId": "submitAnswers",
+        "parameters": [
+          {
+            "name": "examRecordId",
+            "in": "path",
+            "description": "考试记录ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SubmitAnswerVo"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exams/{examRecordId}/grade": {
+      "post": {
+        "tags": [
+          "考试管理"
+        ],
+        "summary": "AI自动批阅",
+        "description": "使用AI技术自动批阅试卷，特别是简答题的智能评分",
+        "operationId": "gradeExam",
+        "parameters": [
+          {
+            "name": "examRecordId",
+            "in": "path",
+            "description": "考试记录ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultExamRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exams/start": {
+      "post": {
+        "tags": [
+          "考试管理"
+        ],
+        "summary": "开始考试",
+        "description": "学生开始考试，创建考试记录并返回试卷内容",
+        "operationId": "startExam",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartExamVo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultExamRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/papers/list": {
+      "get": {
+        "tags": [
+          "试卷管理"
+        ],
+        "summary": "获取试卷列表",
+        "description": "支持按名称模糊搜索和状态筛选的试卷列表查询",
+        "operationId": "listPapers",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "试卷名称，支持模糊查询",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "试卷状态，可选值：DRAFT/PUBLISHED/STOPPED",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListPaper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exams/{id}": {
+      "get": {
+        "tags": [
+          "考试管理"
+        ],
+        "summary": "查询考试记录详情",
+        "description": "获取指定考试记录的详细信息，包括答题情况和得分",
+        "operationId": "getExamRecordById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "考试记录ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultExamRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exams/records": {
+      "get": {
+        "tags": [
+          "考试管理"
+        ],
+        "summary": "获取考试记录列表",
+        "description": "获取所有考试记录列表，包含基本信息和成绩",
+        "operationId": "getMyRecords",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListExamRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exam-records/{id}": {
+      "get": {
+        "tags": [
+          "考试记录管理"
+        ],
+        "summary": "获取考试记录详情",
+        "description": "根据记录ID获取考试记录的详细信息，包括试卷内容和答题情况",
+        "operationId": "getExamRecordById_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "考试记录ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultExamRecord"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "考试记录管理"
+        ],
+        "summary": "删除考试记录",
+        "description": "根据ID删除指定的考试记录",
+        "operationId": "deleteExamRecord",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "考试记录ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exam-records/ranking": {
+      "get": {
+        "tags": [
+          "考试记录管理"
+        ],
+        "summary": "获取考试排行榜",
+        "description": "获取考试成绩排行榜，支持按试卷筛选和限制显示数量，使用优化的SQL关联查询提升性能",
+        "operationId": "getExamRanking",
+        "parameters": [
+          {
+            "name": "paperId",
+            "in": "query",
+            "description": "试卷ID，可选，不传则显示所有试卷的排行",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "显示数量限制，可选，不传则返回所有记录",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListExamRankingVO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exam-records/list": {
+      "get": {
+        "tags": [
+          "考试记录管理"
+        ],
+        "summary": "分页查询考试记录",
+        "description": "支持多条件筛选的考试记录分页查询，包括按姓名、状态、时间范围等筛选",
+        "operationId": "getExamRecords",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "当前页码，从1开始",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "每页显示数量",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "example": 20
+          },
+          {
+            "name": "studentName",
+            "in": "query",
+            "description": "学生姓名筛选条件",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "studentNumber",
+            "in": "query",
+            "description": "学号筛选条件",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "考试状态，0-进行中，1-已完成，2-已批阅",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "开始日期，格式：yyyy-MM-dd",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "结束日期，格式：yyyy-MM-dd",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultPageExamRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PaperVo": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "试卷名称",
+            "example": "Java基础知识测试卷"
+          },
+          "description": {
+            "type": "string",
+            "description": "试卷描述说明",
+            "example": "本试卷主要考察Java基础语法、面向对象编程等知识点"
+          },
+          "duration": {
+            "maximum": 600,
+            "minimum": 1,
+            "type": "integer",
+            "description": "考试时长（分钟）",
+            "format": "int32",
+            "example": 120
+          },
+          "questions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "description": "试卷题目配置，Key为题目ID，Value为该题分数"
+            },
+            "description": "试卷题目配置，Key为题目ID，Value为该题分数",
+            "example": {
+              "1": 5,
+              "2": 10,
+              "3": 15
+            }
+          }
+        },
+        "description": "试卷创建请求参数"
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string",
+            "description": "分类名称",
+            "example": "Java基础"
+          },
+          "parentId": {
+            "type": "integer",
+            "description": "父分类ID，顶级分类为0",
+            "format": "int64",
+            "example": 0
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序序号，数字越小越靠前",
+            "format": "int32",
+            "example": 1
+          },
+          "children": {
+            "type": "array",
+            "description": "子分类列表，用于构建分类树结构",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "该分类下的题目数量",
+            "format": "int64",
+            "example": 25
+          }
+        },
+        "description": "题目分类信息"
+      },
+      "Paper": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string",
+            "description": "试卷名称",
+            "example": "Java基础知识测试"
+          },
+          "description": {
+            "type": "string",
+            "description": "试卷描述",
+            "example": "本试卷主要考察Java基础语法、面向对象编程等知识点"
+          },
+          "status": {
+            "type": "string",
+            "description": "试卷状态",
+            "example": "PUBLISHED",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "STOPPED"
+            ]
+          },
+          "totalScore": {
+            "type": "number",
+            "description": "试卷总分",
+            "example": 100
+          },
+          "questionCount": {
+            "type": "integer",
+            "description": "题目数量",
+            "format": "int32",
+            "example": 20
+          },
+          "duration": {
+            "type": "integer",
+            "description": "考试时长，单位：分钟",
+            "format": "int32",
+            "example": 120
+          },
+          "questions": {
+            "type": "array",
+            "description": "试卷包含的题目列表，含题目详细信息和分值",
+            "items": {
+              "$ref": "#/components/schemas/Question"
+            }
+          }
+        },
+        "description": "试卷信息"
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "description": "题目标题内容",
+            "example": "以下关于Java面向对象编程的说法正确的是？"
+          },
+          "type": {
+            "type": "string",
+            "description": "题目类型",
+            "example": "CHOICE",
+            "enum": [
+              "CHOICE",
+              "JUDGE",
+              "TEXT"
+            ]
+          },
+          "multi": {
+            "type": "boolean",
+            "description": "是否为多选题，仅选择题有效",
+            "example": false
+          },
+          "categoryId": {
+            "type": "integer",
+            "description": "题目分类ID",
+            "format": "int64",
+            "example": 1
+          },
+          "difficulty": {
+            "type": "string",
+            "description": "题目难度等级",
+            "example": "MEDIUM",
+            "enum": [
+              "EASY",
+              "MEDIUM",
+              "HARD"
+            ]
+          },
+          "score": {
+            "type": "integer",
+            "description": "题目默认分值",
+            "format": "int32",
+            "example": 5
+          },
+          "paperScore": {
+            "type": "number",
+            "description": "在特定试卷中的分值",
+            "example": 10
+          },
+          "analysis": {
+            "type": "string",
+            "description": "题目解析，详细的答案说明",
+            "example": "Java是面向对象编程语言，支持封装、继承、多态三大特性..."
+          },
+          "choices": {
+            "type": "array",
+            "description": "选择题选项列表，包含A、B、C、D等选项",
+            "items": {
+              "$ref": "#/components/schemas/QuestionChoice"
+            }
+          },
+          "answer": {
+            "$ref": "#/components/schemas/QuestionAnswer"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          }
+        },
+        "description": "题目信息"
+      },
+      "QuestionAnswer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "questionId": {
+            "type": "integer",
+            "description": "关联的题目ID",
+            "format": "int64",
+            "example": 1
+          },
+          "answer": {
+            "type": "string",
+            "description": "标准答案内容",
+            "example": "正确"
+          },
+          "keywords": {
+            "type": "string",
+            "description": "评分关键词，用于简答题AI评分",
+            "example": "面向对象,封装,继承,多态"
+          }
+        },
+        "description": "题目答案信息"
+      },
+      "QuestionChoice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "questionId": {
+            "type": "integer",
+            "description": "关联的题目ID",
+            "format": "int64",
+            "example": 1
+          },
+          "content": {
+            "type": "string",
+            "description": "选项内容",
+            "example": "Java是面向对象编程语言"
+          },
+          "isCorrect": {
+            "type": "boolean",
+            "description": "是否为正确答案",
+            "example": true
+          },
+          "sort": {
+            "type": "integer",
+            "description": "选项排序序号",
+            "format": "int32",
+            "example": 1
+          }
+        },
+        "description": "题目选项信息"
+      },
+      "ResultPaper": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Paper"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultVoid": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "object",
+            "description": "响应数据，具体的业务数据内容"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "AiPaperVo": {
+        "required": [
+          "name",
+          "rules"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "试卷名称",
+            "example": "Java高级编程考试"
+          },
+          "description": {
+            "type": "string",
+            "description": "试卷描述",
+            "example": "本试卷由AI根据组卷规则自动生成，涵盖多个知识点"
+          },
+          "duration": {
+            "maximum": 600,
+            "minimum": 1,
+            "type": "integer",
+            "description": "考试时长（分钟）",
+            "format": "int32",
+            "example": 90
+          },
+          "rules": {
+            "type": "array",
+            "description": "AI组卷规则列表，定义不同题型的数量、分值等要求",
+            "items": {
+              "$ref": "#/components/schemas/RuleVo"
+            }
+          }
+        },
+        "description": "AI智能组卷请求参数"
+      },
+      "RuleVo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "题目类型",
+            "example": "CHOICE",
+            "enum": [
+              "CHOICE",
+              "JUDGE",
+              "TEXT",
+              "CHOICE",
+              "JUDGE",
+              "TEXT"
+            ]
+          },
+          "categoryIds": {
+            "type": "array",
+            "description": "指定的题目分类ID列表，为空则不限制分类",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "items": {
+              "type": "integer",
+              "description": "指定的题目分类ID列表，为空则不限制分类",
+              "format": "int32"
+            }
+          },
+          "count": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "需要抽取的题目数量",
+            "format": "int32",
+            "example": 10
+          },
+          "score": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "每道题目的分数",
+            "format": "int32",
+            "example": 5
+          }
+        },
+        "description": "AI组卷规则配置"
+      },
+      "SubmitAnswerVo": {
+        "required": [
+          "questionId",
+          "userAnswer"
+        ],
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "integer",
+            "description": "题目ID，指定回答的是哪道题",
+            "format": "int32",
+            "example": 1
+          },
+          "userAnswer": {
+            "type": "string",
+            "description": "用户提交的答案",
+            "example": "A"
+          }
+        },
+        "description": "考试答案提交数据"
+      },
+      "AnswerRecord": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "examRecordId": {
+            "type": "integer",
+            "description": "关联的考试记录ID",
+            "format": "int32",
+            "example": 1
+          },
+          "questionId": {
+            "type": "integer",
+            "description": "题目ID",
+            "format": "int32",
+            "example": 5
+          },
+          "userAnswer": {
+            "type": "string",
+            "description": "学生提交的答案",
+            "example": "A"
+          },
+          "score": {
+            "type": "integer",
+            "description": "该题得分",
+            "format": "int32",
+            "example": 5
+          },
+          "isCorrect": {
+            "type": "integer",
+            "description": "答题正确性",
+            "format": "int32",
+            "example": 1,
+            "enum": [
+              0,
+              1,
+              2
+            ]
+          },
+          "aiCorrection": {
+            "type": "string",
+            "description": "AI智能批改的评价意见",
+            "example": "答案基本正确，但缺少关键概念的解释..."
+          }
+        },
+        "description": "答题记录信息"
+      },
+      "ExamRecord": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "examId": {
+            "type": "integer",
+            "description": "试卷ID，关联的考试试卷",
+            "format": "int32",
+            "example": 1
+          },
+          "studentName": {
+            "type": "string",
+            "description": "考生姓名",
+            "example": "张三"
+          },
+          "score": {
+            "type": "integer",
+            "description": "考试得分",
+            "format": "int32",
+            "example": 85
+          },
+          "answers": {
+            "type": "string",
+            "description": "答题记录，JSON格式存储所有答题内容",
+            "example": "[{\"questionId\":1,\"userAnswer\":\"A\"},{\"questionId\":2,\"userAnswer\":\"B\"}]"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "考试开始时间",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "考试结束时间",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "description": "考试状态",
+            "example": "已批阅",
+            "enum": [
+              "进行中",
+              "已完成",
+              "已批阅"
+            ]
+          },
+          "windowSwitches": {
+            "type": "integer",
+            "description": "窗口切换次数，用于监控考试过程中的异常行为",
+            "format": "int32",
+            "example": 2
+          },
+          "answerRecords": {
+            "type": "array",
+            "description": "详细的答题记录列表，包含每题的答案和得分情况",
+            "items": {
+              "$ref": "#/components/schemas/AnswerRecord"
+            }
+          },
+          "paper": {
+            "$ref": "#/components/schemas/Paper"
+          }
+        },
+        "description": "考试记录信息"
+      },
+      "ResultExamRecord": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ExamRecord"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "StartExamVo": {
+        "required": [
+          "paperId",
+          "studentName"
+        ],
+        "type": "object",
+        "properties": {
+          "paperId": {
+            "type": "integer",
+            "description": "试卷ID，指定要参加的考试试卷",
+            "format": "int32",
+            "example": 1
+          },
+          "studentName": {
+            "type": "string",
+            "description": "考生姓名",
+            "example": "张三"
+          }
+        },
+        "description": "开始考试请求参数"
+      },
+      "ResultListPaper": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "响应数据，具体的业务数据内容",
+            "items": {
+              "$ref": "#/components/schemas/Paper"
+            }
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultListExamRecord": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "响应数据，具体的业务数据内容",
+            "items": {
+              "$ref": "#/components/schemas/ExamRecord"
+            }
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ExamRankingVO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "考试记录ID",
+            "format": "int32",
+            "example": 1
+          },
+          "studentName": {
+            "type": "string",
+            "description": "考生姓名",
+            "example": "张三"
+          },
+          "score": {
+            "type": "integer",
+            "description": "考试得分",
+            "format": "int32",
+            "example": 85
+          },
+          "examId": {
+            "type": "integer",
+            "description": "试卷ID",
+            "format": "int32",
+            "example": 1
+          },
+          "paperName": {
+            "type": "string",
+            "description": "试卷名称",
+            "example": "Java基础知识测试"
+          },
+          "paperTotalScore": {
+            "type": "number",
+            "description": "试卷总分",
+            "example": 100
+          },
+          "startTime": {
+            "type": "string",
+            "description": "考试开始时间",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "考试结束时间",
+            "format": "date-time"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "考试用时（分钟）",
+            "format": "int64",
+            "example": 120
+          },
+          "paper": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "试卷信息对象（兼容前端）"
+            },
+            "description": "试卷信息对象（兼容前端）"
+          }
+        },
+        "description": "考试排行榜信息"
+      },
+      "ResultListExamRankingVO": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "响应数据，具体的业务数据内容",
+            "items": {
+              "$ref": "#/components/schemas/ExamRankingVO"
+            }
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "column": {
+            "type": "string"
+          },
+          "asc": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageExamRecord": {
+        "type": "object",
+        "properties": {
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamRecord"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "current": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "orders": {
+            "type": "array",
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "optimizeCountSql": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "searchCount": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "optimizeJoinOfCountSql": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "maxLimit": {
+            "type": "integer",
+            "format": "int64",
+            "deprecated": true
+          },
+          "countId": {
+            "type": "string",
+            "deprecated": true
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "description": "响应数据，具体的业务数据内容"
+      },
+      "ResultPageExamRecord": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageExamRecord"
+          }
+        },
+        "description": "统一API响应结果"
+      }
+    }
+  }
+}

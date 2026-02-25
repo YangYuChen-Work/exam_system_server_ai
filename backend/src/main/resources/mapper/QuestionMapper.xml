@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.practicedemo.exam.mapper.QuestionMapper">
+    <resultMap id="questionMap" type="org.practicedemo.exam.entity.Question">
+        <id property="id" column="id"/>
+        <association property="answer" javaType="org.practicedemo.exam.entity.QuestionAnswer">
+            <id property="id" column="qas_id"/>
+            <result property="answer" column="qas_answer"/>
+            <result property="keywords" column="keywords"/>
+            <result property="createTime" column="qas_creator_time"/>
+            <result property="updateTime" column="qas_update_time"/>
+            <result property="questionId" column="id"/>
+        </association>
+        <collection property="choices" ofType="org.practicedemo.exam.entity.QuestionChoice"
+                column="id" select="org.practicedemo.exam.mapper.QuestionChoiceMapper.selectByQuestionId"
+        />
+    </resultMap>
+
+    <select id="customPage" resultMap="questionMap">
+        SELECT
+        qs.*,
+        qas.id qas_id,
+        qas.answer qas_answer,
+        qas.keywords,
+        qas.create_time qas_creator_time,
+        qas.update_time qas_update_time
+
+        FROM questions qs
+        LEFT JOIN question_answers qas
+        ON qs.id = qas.question_id
+        AND qas.is_deleted = 0
+        <if test="queryVo.type != null and queryVo.type != ''">
+            AND qs.type = #{queryVo.type}
+        </if>
+        <if test="queryVo.difficulty != null and queryVo.difficulty != ''">
+            AND qs.difficulty = #{queryVo.difficulty}
+        </if>
+        <if test="queryVo.id != null">
+            AND qs.category_id = #{queryVo.id}
+        </if>
+        <if test="queryVo.keywords != null and queryVo.keywords != ''">
+            AND qs.title LIKE CONCAT('%', #{queryVo.keywords}, '%')
+        </if>
+        ORDER BY qs.create_time DESC
+    </select>
+
+</mapper>

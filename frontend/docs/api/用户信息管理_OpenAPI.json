@@ -1,0 +1,206 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "🎓 智能考试系统API文档",
+    "description": "📚 智能考试系统后端接口文档，提供完整的RESTful API服务\n\n✨ 主要功能模块：\n• 🧠 题目管理：支持选择题、判断题、简答题的增删改查\n• 📝 试卷管理：手动组卷和AI智能组卷\n• 🎨 轮播图管理：首页轮播图的图片上传和管理\n• 📊 考试记录：考试结果统计和分析\n• 🔔 公告管理：系统公告的发布和管理",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "用户管理",
+      "description": "用户相关操作，包括登录认证、权限验证等功能"
+    }
+  ],
+  "paths": {
+    "/api/user/login": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "用户登录",
+        "description": "用户通过用户名和密码进行登录验证，返回用户信息和token",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestVo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultLoginResponseVo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/check-admin/{userId}": {
+      "get": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "检查管理员权限",
+        "description": "验证指定用户是否具有管理员权限",
+        "operationId": "checkAdmin",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "用户ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultBoolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LoginRequestVo": {
+        "required": [
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "用户名",
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "description": "登录密码",
+            "example": "123456"
+          }
+        },
+        "description": "用户登录请求参数"
+      },
+      "LoginResponseVo": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "description": "用户ID",
+            "format": "int64",
+            "example": 1
+          },
+          "username": {
+            "type": "string",
+            "description": "用户名",
+            "example": "admin"
+          },
+          "realName": {
+            "type": "string",
+            "description": "用户真实姓名",
+            "example": "管理员"
+          },
+          "role": {
+            "type": "string",
+            "description": "用户角色",
+            "example": "ADMIN",
+            "enum": [
+              "ADMIN",
+              "TEACHER",
+              "STUDENT"
+            ]
+          },
+          "token": {
+            "type": "string",
+            "description": "登录令牌，用于后续API调用的身份验证",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        },
+        "description": "登录成功响应数据"
+      },
+      "ResultLoginResponseVo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/LoginResponseVo"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultBoolean": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "boolean",
+            "description": "响应数据，具体的业务数据内容"
+          }
+        },
+        "description": "统一API响应结果"
+      }
+    }
+  }
+}

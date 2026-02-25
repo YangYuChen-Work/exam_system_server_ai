@@ -1,0 +1,1441 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "🎓 智能考试系统API文档",
+    "description": "📚 智能考试系统后端接口文档，提供完整的RESTful API服务\n\n✨ 主要功能模块：\n• 🧠 题目管理：支持选择题、判断题、简答题的增删改查\n• 📝 试卷管理：手动组卷和AI智能组卷\n• 🎨 轮播图管理：首页轮播图的图片上传和管理\n• 📊 考试记录：考试结果统计和分析\n• 🔔 公告管理：系统公告的发布和管理",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "视频管理(用户端)",
+      "description": "用户端视频相关操作，包括视频浏览、观看、点赞、投稿等功能"
+    },
+    {
+      "name": "视频管理(管理端)",
+      "description": "管理端视频相关操作，包括视频管理、审核、统计等功能"
+    },
+    {
+      "name": "视频分类管理",
+      "description": "视频分类相关操作，包括分类的增删改查、树形结构管理等功能"
+    }
+  ],
+  "paths": {
+    "/api/video-categories": {
+      "get": {
+        "tags": [
+          "视频分类管理"
+        ],
+        "summary": "获取分类列表",
+        "description": "获取所有视频分类列表，包含每个分类下的视频数量统计",
+        "operationId": "getCategories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListVideoCategory"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "视频分类管理"
+        ],
+        "summary": "更新分类信息",
+        "description": "修改分类的名称、描述、排序等信息",
+        "operationId": "updateCategory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoCategory"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "视频分类管理"
+        ],
+        "summary": "添加新分类",
+        "description": "创建新的视频分类，支持设置父分类实现层级结构",
+        "operationId": "addCategory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoCategory"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{videoId}/view": {
+      "post": {
+        "tags": [
+          "视频管理(用户端)"
+        ],
+        "summary": "记录视频观看",
+        "description": "记录用户观看视频的行为和时长",
+        "operationId": "recordVideoView",
+        "parameters": [
+          {
+            "name": "videoId",
+            "in": "path",
+            "description": "视频ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "viewDuration",
+            "in": "query",
+            "description": "观看时长（秒）",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{videoId}/like": {
+      "post": {
+        "tags": [
+          "视频管理(用户端)"
+        ],
+        "summary": "切换点赞状态",
+        "description": "切换用户对视频的点赞状态，返回当前状态",
+        "operationId": "toggleVideoLike",
+        "parameters": [
+          {
+            "name": "videoId",
+            "in": "path",
+            "description": "视频ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultMapStringObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/submit": {
+      "post": {
+        "tags": [
+          "视频管理(用户端)"
+        ],
+        "summary": "用户投稿视频",
+        "description": "用户上传视频进行投稿，需要等待审核",
+        "operationId": "submitVideo",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "description": "视频标题",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "description": "视频描述",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "分类ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "标签",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uploaderName",
+            "in": "query",
+            "description": "上传者名称",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "description": "视频时长（秒）",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "videoFile"
+                ],
+                "type": "object",
+                "properties": {
+                  "videoFile": {
+                    "type": "string",
+                    "description": "视频文件",
+                    "format": "binary"
+                  },
+                  "coverFile": {
+                    "type": "string",
+                    "description": "封面文件",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultMapStringObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/videos/{videoId}/offline": {
+      "post": {
+        "tags": [
+          "视频管理(管理端)"
+        ],
+        "summary": "下架视频",
+        "description": "管理员将已发布的视频下架",
+        "operationId": "offlineVideo",
+        "parameters": [
+          {
+            "name": "videoId",
+            "in": "path",
+            "description": "视频ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/videos/{videoId}/audit": {
+      "post": {
+        "tags": [
+          "视频管理(管理端)"
+        ],
+        "summary": "审核视频",
+        "description": "管理员审核用户投稿的视频，可以通过或拒绝",
+        "operationId": "auditVideo",
+        "parameters": [
+          {
+            "name": "videoId",
+            "in": "path",
+            "description": "视频ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "审核状态：1-通过，2-拒绝",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "description": "审核原因（拒绝时必填）",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/videos/upload": {
+      "post": {
+        "tags": [
+          "视频管理(管理端)"
+        ],
+        "summary": "管理员上传视频",
+        "description": "管理员直接上传视频，无需审核直接发布",
+        "operationId": "uploadVideoByAdmin",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "description": "视频标题",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "description": "视频描述",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "分类ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "标签",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uploaderName",
+            "in": "query",
+            "description": "上传者名称",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "description": "视频时长（秒）",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "videoFile"
+                ],
+                "type": "object",
+                "properties": {
+                  "videoFile": {
+                    "type": "string",
+                    "description": "视频文件",
+                    "format": "binary"
+                  },
+                  "coverFile": {
+                    "type": "string",
+                    "description": "封面文件",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultMapStringObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos": {
+      "get": {
+        "tags": [
+          "视频管理(用户端)"
+        ],
+        "summary": "获取视频列表",
+        "description": "分页获取已发布的视频列表，支持按分类和关键字筛选",
+        "operationId": "getVideos",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "页码，默认1",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "每页大小，默认10",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "分类ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "搜索关键字",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultIPageVideo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{id}": {
+      "get": {
+        "tags": [
+          "视频管理(用户端)"
+        ],
+        "summary": "获取视频详情",
+        "description": "根据视频ID获取详细信息，包含用户点赞状态",
+        "operationId": "getVideoDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "视频ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVideo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/popular": {
+      "get": {
+        "tags": [
+          "视频管理(用户端)"
+        ],
+        "summary": "获取热门视频",
+        "description": "根据观看次数获取热门视频列表",
+        "operationId": "getPopularVideos",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "限制数量，默认10",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListVideo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/latest": {
+      "get": {
+        "tags": [
+          "视频管理(用户端)"
+        ],
+        "summary": "获取最新视频",
+        "description": "根据发布时间获取最新视频列表",
+        "operationId": "getLatestVideos",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "限制数量，默认10",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListVideo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/video-categories/{id}": {
+      "get": {
+        "tags": [
+          "视频分类管理"
+        ],
+        "summary": "获取分类详情",
+        "description": "根据分类ID获取详细信息，包含视频数量和父级分类名称",
+        "operationId": "getCategoryById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "分类ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVideoCategory"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "视频分类管理"
+        ],
+        "summary": "删除分类",
+        "description": "删除指定的视频分类，注意：删除前需确保分类下没有视频",
+        "operationId": "deleteCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "分类ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/video-categories/tree": {
+      "get": {
+        "tags": [
+          "视频分类管理"
+        ],
+        "summary": "获取分类树形结构",
+        "description": "获取视频分类的树形层级结构，用于前端组件展示",
+        "operationId": "getCategoryTree",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListVideoCategory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/video-categories/top": {
+      "get": {
+        "tags": [
+          "视频分类管理"
+        ],
+        "summary": "获取顶级分类",
+        "description": "获取所有启用的顶级分类，用于导航菜单",
+        "operationId": "getTopCategories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListVideoCategory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/video-categories/children/{parentId}": {
+      "get": {
+        "tags": [
+          "视频分类管理"
+        ],
+        "summary": "获取子分类",
+        "description": "根据父级分类ID获取其下的子分类列表",
+        "operationId": "getChildCategories",
+        "parameters": [
+          {
+            "name": "parentId",
+            "in": "path",
+            "description": "父级分类ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListVideoCategory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/videos": {
+      "get": {
+        "tags": [
+          "视频管理(管理端)"
+        ],
+        "summary": "获取视频列表(管理端)",
+        "description": "管理端分页获取视频列表，支持多条件筛选",
+        "operationId": "getVideosForAdmin",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "页码，默认1",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "每页大小，默认10",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "状态：0-待审核，1-已发布，2-已拒绝，3-已下架",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "uploaderType",
+            "in": "query",
+            "description": "上传者类型：1-用户投稿，2-管理员上传",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "搜索关键字",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultIPageVideo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/videos/{videoId}/stats": {
+      "get": {
+        "tags": [
+          "视频管理(管理端)"
+        ],
+        "summary": "获取视频详细统计",
+        "description": "获取指定视频的详细统计数据，包括观看、点赞等趋势",
+        "operationId": "getVideoDetailStats",
+        "parameters": [
+          {
+            "name": "videoId",
+            "in": "path",
+            "description": "视频ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "统计天数，默认30天",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultMapStringObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/videos/statistics": {
+      "get": {
+        "tags": [
+          "视频管理(管理端)"
+        ],
+        "summary": "获取视频统计",
+        "description": "获取视频相关的统计数据，用于仪表板展示",
+        "operationId": "getVideoStatistics",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultMapStringObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/videos/{videoId}": {
+      "delete": {
+        "tags": [
+          "视频管理(管理端)"
+        ],
+        "summary": "删除视频",
+        "description": "管理员删除视频（危险操作，会删除所有相关数据）",
+        "operationId": "deleteVideo",
+        "parameters": [
+          {
+            "name": "videoId",
+            "in": "path",
+            "description": "视频ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VideoCategory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "分类ID，唯一标识",
+            "format": "int64",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "分类名称",
+            "example": "Java基础"
+          },
+          "description": {
+            "type": "string",
+            "description": "分类描述",
+            "example": "Java编程语言基础知识讲解"
+          },
+          "parentId": {
+            "type": "integer",
+            "description": "父级分类ID，0为顶级分类",
+            "format": "int64",
+            "example": 0
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "排序权重，数字越小越靠前",
+            "format": "int32",
+            "example": 1
+          },
+          "status": {
+            "type": "integer",
+            "description": "状态：1-启用，0-禁用",
+            "format": "int32",
+            "example": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间",
+            "format": "date-time"
+          },
+          "children": {
+            "type": "array",
+            "description": "子分类列表，用于构建分类树结构",
+            "items": {
+              "$ref": "#/components/schemas/VideoCategory"
+            }
+          },
+          "videoCount": {
+            "type": "integer",
+            "description": "该分类下的视频数量",
+            "format": "int64",
+            "example": 15
+          },
+          "parentName": {
+            "type": "string",
+            "description": "父级分类名称",
+            "example": "编程技术"
+          }
+        },
+        "description": "视频分类信息"
+      },
+      "ResultVoid": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "object",
+            "description": "响应数据，具体的业务数据内容"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultMapStringObject": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "响应数据，具体的业务数据内容"
+            },
+            "description": "响应数据，具体的业务数据内容"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "IPageVideo": {
+        "type": "object",
+        "properties": {
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Video"
+            }
+          },
+          "current": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "description": "响应数据，具体的业务数据内容"
+      },
+      "ResultIPageVideo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/IPageVideo"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "Video": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "视频ID，唯一标识",
+            "format": "int64",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "description": "视频标题",
+            "example": "Java基础语法入门"
+          },
+          "description": {
+            "type": "string",
+            "description": "视频描述",
+            "example": "从零开始学习Java编程语言，掌握基本语法和编程思想"
+          },
+          "categoryId": {
+            "type": "integer",
+            "description": "分类ID",
+            "format": "int64",
+            "example": 11
+          },
+          "fileUrl": {
+            "type": "string",
+            "description": "视频文件URL",
+            "example": "http://localhost:9000/videos/original/java-basic-syntax.mp4"
+          },
+          "coverUrl": {
+            "type": "string",
+            "description": "封面图片URL",
+            "example": "http://localhost:9000/videos/covers/java-basic-syntax.jpg"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "视频时长（秒）",
+            "format": "int32",
+            "example": 1800
+          },
+          "fileSize": {
+            "type": "integer",
+            "description": "文件大小（字节）",
+            "format": "int64",
+            "example": 104857600
+          },
+          "uploaderName": {
+            "type": "string",
+            "description": "上传者名称",
+            "example": "技术讲师"
+          },
+          "uploaderType": {
+            "type": "integer",
+            "description": "上传者类型：1-用户投稿，2-管理员上传",
+            "format": "int32",
+            "example": 2
+          },
+          "userId": {
+            "type": "integer",
+            "description": "上传用户ID（用户投稿时）",
+            "format": "int64",
+            "example": 123
+          },
+          "adminId": {
+            "type": "integer",
+            "description": "管理员ID（管理员上传时）",
+            "format": "int64",
+            "example": 1
+          },
+          "status": {
+            "type": "integer",
+            "description": "状态：0-待审核，1-已发布，2-已拒绝，3-已下架",
+            "format": "int32",
+            "example": 1
+          },
+          "auditAdminId": {
+            "type": "integer",
+            "description": "审核管理员ID",
+            "format": "int64",
+            "example": 1
+          },
+          "auditTime": {
+            "type": "string",
+            "description": "审核时间",
+            "format": "date-time"
+          },
+          "auditReason": {
+            "type": "string",
+            "description": "审核原因（拒绝时）",
+            "example": "内容不符合平台规范"
+          },
+          "viewCount": {
+            "type": "integer",
+            "description": "观看次数",
+            "format": "int64",
+            "example": 156
+          },
+          "likeCount": {
+            "type": "integer",
+            "description": "点赞次数",
+            "format": "int64",
+            "example": 23
+          },
+          "tags": {
+            "type": "string",
+            "description": "标签，逗号分隔",
+            "example": "Java,基础,语法,入门"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间",
+            "format": "date-time"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "分类名称",
+            "example": "Java基础"
+          },
+          "uploaderTypeText": {
+            "type": "string",
+            "description": "上传者类型文本",
+            "example": "管理员上传"
+          },
+          "statusText": {
+            "type": "string",
+            "description": "状态文本",
+            "example": "已发布"
+          },
+          "auditAdminName": {
+            "type": "string",
+            "description": "审核管理员名称",
+            "example": "管理员"
+          },
+          "durationText": {
+            "type": "string",
+            "description": "视频时长格式化文本",
+            "example": "30:00"
+          },
+          "fileSizeText": {
+            "type": "string",
+            "description": "文件大小格式化文本",
+            "example": "100MB"
+          },
+          "isLiked": {
+            "type": "boolean",
+            "description": "当前用户是否已点赞",
+            "example": true
+          }
+        },
+        "description": "视频信息"
+      },
+      "ResultVideo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Video"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultListVideo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "响应数据，具体的业务数据内容",
+            "items": {
+              "$ref": "#/components/schemas/Video"
+            }
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultListVideoCategory": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "响应数据，具体的业务数据内容",
+            "items": {
+              "$ref": "#/components/schemas/VideoCategory"
+            }
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultVideoCategory": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/VideoCategory"
+          }
+        },
+        "description": "统一API响应结果"
+      }
+    }
+  }
+}

@@ -1,0 +1,1475 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "🎓 智能考试系统API文档",
+    "description": "📚 智能考试系统后端接口文档，提供完整的RESTful API服务\n\n✨ 主要功能模块：\n• 🧠 题目管理：支持选择题、判断题、简答题的增删改查\n• 📝 试卷管理：手动组卷和AI智能组卷\n• 🎨 轮播图管理：首页轮播图的图片上传和管理\n• 📊 考试记录：考试结果统计和分析\n• 🔔 公告管理：系统公告的发布和管理",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "分类管理",
+      "description": "题目分类相关操作，包括分类的增删改查、树形结构管理等功能"
+    },
+    {
+      "name": "题目管理",
+      "description": "题目相关的增删改查操作，包括分页查询、随机获取、热门推荐等功能"
+    },
+    {
+      "name": "题目批量操作",
+      "description": "题目批量管理相关操作，包括Excel导入、AI生成题目、批量验证等功能"
+    }
+  ],
+  "paths": {
+    "/api/questions/{id}": {
+      "get": {
+        "tags": [
+          "题目管理"
+        ],
+        "summary": "根据ID查询题目详情",
+        "description": "获取指定ID的题目完整信息，包括题目内容、选项、答案等详细数据",
+        "operationId": "getQuestionById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "题目ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultQuestion"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "题目管理"
+        ],
+        "summary": "更新题目信息",
+        "description": "修改指定题目的内容、选项、答案等信息",
+        "operationId": "updateQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "题目ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Question"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultQuestion"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "题目管理"
+        ],
+        "summary": "删除题目",
+        "description": "根据ID删除指定的题目，包括关联的选项和答案数据",
+        "operationId": "deleteQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "题目ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "tags": [
+          "分类管理"
+        ],
+        "summary": "获取分类列表",
+        "description": "获取所有题目分类列表，包含每个分类下的题目数量统计",
+        "operationId": "getCategories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListCategory"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "分类管理"
+        ],
+        "summary": "更新分类信息",
+        "description": "修改分类的名称、描述、排序等信息",
+        "operationId": "updateCategory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Category"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "分类管理"
+        ],
+        "summary": "添加新分类",
+        "description": "创建新的题目分类，支持设置父分类实现层级结构",
+        "operationId": "addCategory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Category"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions": {
+      "post": {
+        "tags": [
+          "题目管理"
+        ],
+        "summary": "创建新题目",
+        "description": "添加新的考试题目，支持选择题、判断题、简答题等多种题型",
+        "operationId": "createQuestion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Question"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultQuestion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/popular/refresh": {
+      "post": {
+        "tags": [
+          "题目管理"
+        ],
+        "summary": "刷新热门题目缓存",
+        "description": "管理员功能，重置或初始化热门题目的访问计数",
+        "operationId": "refreshPopularQuestions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultInteger"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/batch/validate": {
+      "post": {
+        "tags": [
+          "题目批量操作"
+        ],
+        "summary": "验证题目数据",
+        "description": "验证题目数据的完整性和格式正确性，返回验证结果和错误信息",
+        "operationId": "validateQuestions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/QuestionImportVo"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/batch/preview-excel": {
+      "post": {
+        "tags": [
+          "题目批量操作"
+        ],
+        "summary": "预览Excel文件内容",
+        "description": "解析并预览Excel文件中的题目内容，不会导入到数据库",
+        "operationId": "previewExcel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "Excel文件，支持.xls和.xlsx格式",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListQuestionImportVo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/batch/import-questions": {
+      "post": {
+        "tags": [
+          "题目批量操作"
+        ],
+        "summary": "批量导入题目",
+        "description": "将题目列表批量导入到数据库，支持Excel解析后的导入或AI生成后的确认导入",
+        "operationId": "importQuestions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/QuestionImportVo"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/batch/import-excel": {
+      "post": {
+        "tags": [
+          "题目批量操作"
+        ],
+        "summary": "从Excel文件批量导入题目",
+        "description": "解析Excel文件并将题目批量导入到数据库",
+        "operationId": "importFromExcel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "Excel文件，包含题目数据",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/batch/ai-generate": {
+      "post": {
+        "tags": [
+          "题目批量操作"
+        ],
+        "summary": "AI智能生成题目",
+        "description": "使用AI技术根据指定主题和要求智能生成题目，支持预览后再决定是否导入",
+        "operationId": "generateQuestionsByAi",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiGenerateRequestVo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListQuestionImportVo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/random": {
+      "get": {
+        "tags": [
+          "题目管理"
+        ],
+        "summary": "随机获取题目",
+        "description": "按指定条件随机抽取题目，用于智能组卷功能",
+        "operationId": "getRandomQuestions",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "description": "需要获取的题目数量",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            },
+            "example": 10
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "分类ID限制条件，可选",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "description": "难度限制条件，可选值：EASY/MEDIUM/HARD",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListQuestion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/popular": {
+      "get": {
+        "tags": [
+          "题目管理"
+        ],
+        "summary": "获取热门题目",
+        "description": "获取访问次数最多的热门题目，用于首页推荐展示",
+        "operationId": "getPopularQuestions",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "description": "返回题目数量",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListQuestion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/list": {
+      "get": {
+        "tags": [
+          "题目管理"
+        ],
+        "summary": "分页查询题目列表",
+        "description": "支持按分类、难度、题型、关键词进行多条件筛选的分页查询",
+        "operationId": "getQuestionList",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "当前页码，从1开始",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "每页显示数量",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            },
+            "example": 10
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "分类ID筛选条件",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "description": "难度筛选条件，可选值：EASY/MEDIUM/HARD",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "题型筛选条件，可选值：CHOICE/JUDGE/TEXT",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "关键词搜索，对题目标题进行模糊查询",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultPageQuestion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/difficulty/{difficulty}": {
+      "get": {
+        "tags": [
+          "题目管理"
+        ],
+        "summary": "按难度查询题目",
+        "description": "获取指定难度等级的题目列表",
+        "operationId": "getQuestionsByDifficulty",
+        "parameters": [
+          {
+            "name": "difficulty",
+            "in": "path",
+            "description": "难度等级，可选值：EASY(简单)/MEDIUM(中等)/HARD(困难)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListQuestion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/category/{categoryId}": {
+      "get": {
+        "tags": [
+          "题目管理"
+        ],
+        "summary": "按分类查询题目",
+        "description": "获取指定分类下的所有题目列表",
+        "operationId": "getQuestionsByCategory",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "description": "分类ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListQuestion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/batch/template": {
+      "get": {
+        "tags": [
+          "题目批量操作"
+        ],
+        "summary": "下载Excel导入模板",
+        "description": "下载题目批量导入的Excel模板文件",
+        "operationId": "downloadTemplate",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories/tree": {
+      "get": {
+        "tags": [
+          "分类管理"
+        ],
+        "summary": "获取分类树形结构",
+        "description": "获取题目分类的树形层级结构，用于前端树形组件展示",
+        "operationId": "getCategoryTree",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListCategory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories/{id}": {
+      "delete": {
+        "tags": [
+          "分类管理"
+        ],
+        "summary": "删除分类",
+        "description": "删除指定的题目分类，注意：删除前需确保分类下没有题目",
+        "operationId": "deleteCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "分类ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string",
+            "description": "分类名称",
+            "example": "Java基础"
+          },
+          "parentId": {
+            "type": "integer",
+            "description": "父分类ID，顶级分类为0",
+            "format": "int64",
+            "example": 0
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序序号，数字越小越靠前",
+            "format": "int32",
+            "example": 1
+          },
+          "children": {
+            "type": "array",
+            "description": "子分类列表，用于构建分类树结构",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "该分类下的题目数量",
+            "format": "int64",
+            "example": 25
+          }
+        },
+        "description": "题目分类信息"
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "description": "题目标题内容",
+            "example": "以下关于Java面向对象编程的说法正确的是？"
+          },
+          "type": {
+            "type": "string",
+            "description": "题目类型",
+            "example": "CHOICE",
+            "enum": [
+              "CHOICE",
+              "JUDGE",
+              "TEXT"
+            ]
+          },
+          "multi": {
+            "type": "boolean",
+            "description": "是否为多选题，仅选择题有效",
+            "example": false
+          },
+          "categoryId": {
+            "type": "integer",
+            "description": "题目分类ID",
+            "format": "int64",
+            "example": 1
+          },
+          "difficulty": {
+            "type": "string",
+            "description": "题目难度等级",
+            "example": "MEDIUM",
+            "enum": [
+              "EASY",
+              "MEDIUM",
+              "HARD"
+            ]
+          },
+          "score": {
+            "type": "integer",
+            "description": "题目默认分值",
+            "format": "int32",
+            "example": 5
+          },
+          "paperScore": {
+            "type": "number",
+            "description": "在特定试卷中的分值",
+            "example": 10
+          },
+          "analysis": {
+            "type": "string",
+            "description": "题目解析，详细的答案说明",
+            "example": "Java是面向对象编程语言，支持封装、继承、多态三大特性..."
+          },
+          "choices": {
+            "type": "array",
+            "description": "选择题选项列表，包含A、B、C、D等选项",
+            "items": {
+              "$ref": "#/components/schemas/QuestionChoice"
+            }
+          },
+          "answer": {
+            "$ref": "#/components/schemas/QuestionAnswer"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          }
+        },
+        "description": "题目信息"
+      },
+      "QuestionAnswer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "questionId": {
+            "type": "integer",
+            "description": "关联的题目ID",
+            "format": "int64",
+            "example": 1
+          },
+          "answer": {
+            "type": "string",
+            "description": "标准答案内容",
+            "example": "正确"
+          },
+          "keywords": {
+            "type": "string",
+            "description": "评分关键词，用于简答题AI评分",
+            "example": "面向对象,封装,继承,多态"
+          }
+        },
+        "description": "题目答案信息"
+      },
+      "QuestionChoice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "questionId": {
+            "type": "integer",
+            "description": "关联的题目ID",
+            "format": "int64",
+            "example": 1
+          },
+          "content": {
+            "type": "string",
+            "description": "选项内容",
+            "example": "Java是面向对象编程语言"
+          },
+          "isCorrect": {
+            "type": "boolean",
+            "description": "是否为正确答案",
+            "example": true
+          },
+          "sort": {
+            "type": "integer",
+            "description": "选项排序序号",
+            "format": "int32",
+            "example": 1
+          }
+        },
+        "description": "题目选项信息"
+      },
+      "ResultQuestion": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Question"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultVoid": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "object",
+            "description": "响应数据，具体的业务数据内容"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultInteger": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "integer",
+            "description": "响应数据，具体的业务数据内容",
+            "format": "int32"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ChoiceImportDto": {
+        "required": [
+          "content"
+        ],
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "选项内容",
+            "example": "Java支持多重继承"
+          },
+          "isCorrect": {
+            "type": "boolean",
+            "description": "是否为正确答案",
+            "example": false
+          },
+          "sort": {
+            "type": "integer",
+            "description": "选项排序序号",
+            "format": "int32",
+            "example": 1
+          }
+        },
+        "description": "选择题选项数据"
+      },
+      "QuestionImportVo": {
+        "required": [
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "题目标题内容",
+            "example": "以下关于Java面向对象编程的说法正确的是？"
+          },
+          "type": {
+            "type": "string",
+            "description": "题目类型",
+            "example": "CHOICE",
+            "enum": [
+              "CHOICE",
+              "JUDGE",
+              "TEXT"
+            ]
+          },
+          "multi": {
+            "type": "boolean",
+            "description": "是否为多选题（仅选择题有效）",
+            "example": false
+          },
+          "categoryId": {
+            "type": "integer",
+            "description": "题目分类ID",
+            "format": "int64",
+            "example": 1
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "分类名称（仅用于显示，不会保存到数据库）",
+            "example": "Java基础"
+          },
+          "difficulty": {
+            "type": "string",
+            "description": "题目难度级别",
+            "example": "MEDIUM",
+            "enum": [
+              "EASY",
+              "MEDIUM",
+              "HARD"
+            ]
+          },
+          "score": {
+            "type": "integer",
+            "description": "题目默认分值",
+            "format": "int32",
+            "example": 5
+          },
+          "analysis": {
+            "type": "string",
+            "description": "题目解析说明",
+            "example": "Java是面向对象编程语言，支持封装、继承、多态三大特性..."
+          },
+          "choices": {
+            "type": "array",
+            "description": "选择题选项列表（仅选择题需要）",
+            "items": {
+              "$ref": "#/components/schemas/ChoiceImportDto"
+            }
+          },
+          "answer": {
+            "type": "string",
+            "description": "题目答案（判断题和简答题使用）",
+            "example": "正确"
+          },
+          "keywords": {
+            "type": "string",
+            "description": "答题关键词（用于简答题AI评分）",
+            "example": "面向对象,封装,继承,多态"
+          }
+        },
+        "description": "题目导入数据传输对象"
+      },
+      "ResultString": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "string",
+            "description": "响应数据，具体的业务数据内容"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultListQuestionImportVo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "响应数据，具体的业务数据内容",
+            "items": {
+              "$ref": "#/components/schemas/QuestionImportVo"
+            }
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "AiGenerateRequestVo": {
+        "required": [
+          "count",
+          "topic"
+        ],
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "生成题目的主题",
+            "example": "Java面向对象编程"
+          },
+          "count": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer",
+            "description": "生成题目的数量，范围1-20",
+            "format": "int32",
+            "example": 5
+          },
+          "types": {
+            "type": "string",
+            "description": "题目类型，多个用逗号分隔",
+            "example": "CHOICE,JUDGE,TEXT",
+            "enum": [
+              "CHOICE",
+              "JUDGE",
+              "TEXT",
+              "CHOICE,JUDGE",
+              "CHOICE,TEXT",
+              "JUDGE,TEXT",
+              "CHOICE,JUDGE,TEXT"
+            ]
+          },
+          "difficulty": {
+            "type": "string",
+            "description": "题目难度等级",
+            "example": "MEDIUM",
+            "enum": [
+              "EASY",
+              "MEDIUM",
+              "HARD"
+            ]
+          },
+          "categoryId": {
+            "type": "integer",
+            "description": "题目分类ID，可以指定生成题目所属的分类",
+            "format": "int64",
+            "example": 1
+          },
+          "includeMultiple": {
+            "type": "boolean",
+            "description": "是否包含多选题，仅在题目类型包含CHOICE时有效",
+            "example": false
+          },
+          "requirements": {
+            "type": "string",
+            "description": "额外的生成要求和说明",
+            "example": "重点考察实际应用，包含代码示例"
+          }
+        },
+        "description": "AI智能生成题目请求参数"
+      },
+      "ResultListQuestion": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "响应数据，具体的业务数据内容",
+            "items": {
+              "$ref": "#/components/schemas/Question"
+            }
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "column": {
+            "type": "string"
+          },
+          "asc": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageQuestion": {
+        "type": "object",
+        "properties": {
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Question"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "current": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "orders": {
+            "type": "array",
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "optimizeCountSql": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "searchCount": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "optimizeJoinOfCountSql": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "maxLimit": {
+            "type": "integer",
+            "format": "int64",
+            "deprecated": true
+          },
+          "countId": {
+            "type": "string",
+            "deprecated": true
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "description": "响应数据，具体的业务数据内容"
+      },
+      "ResultPageQuestion": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageQuestion"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultListCategory": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "响应数据，具体的业务数据内容",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          }
+        },
+        "description": "统一API响应结果"
+      }
+    }
+  }
+}

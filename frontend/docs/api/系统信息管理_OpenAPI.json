@@ -1,0 +1,803 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "🎓 智能考试系统API文档",
+    "description": "📚 智能考试系统后端接口文档，提供完整的RESTful API服务\n\n✨ 主要功能模块：\n• 🧠 题目管理：支持选择题、判断题、简答题的增删改查\n• 📝 试卷管理：手动组卷和AI智能组卷\n• 🎨 轮播图管理：首页轮播图的图片上传和管理\n• 📊 考试记录：考试结果统计和分析\n• 🔔 公告管理：系统公告的发布和管理",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "轮播图管理",
+      "description": "轮播图相关操作，包括图片上传、轮播图增删改查、状态管理等功能"
+    },
+    {
+      "name": "公告管理",
+      "description": "系统公告相关操作，包括公告发布、编辑、删除、状态管理等功能"
+    }
+  ],
+  "paths": {
+    "/api/notices/update": {
+      "put": {
+        "tags": [
+          "公告管理"
+        ],
+        "summary": "更新公告信息",
+        "description": "修改公告的内容、标题、类型等信息",
+        "operationId": "updateNotice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Notice"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/toggle/{id}": {
+      "put": {
+        "tags": [
+          "公告管理"
+        ],
+        "summary": "切换公告状态",
+        "description": "启用或禁用指定的公告，禁用后不会在前台显示",
+        "operationId": "toggleNoticeStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "公告ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "description": "是否启用，true为启用，false为禁用",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/banners/update": {
+      "put": {
+        "tags": [
+          "轮播图管理"
+        ],
+        "summary": "更新轮播图",
+        "description": "更新轮播图的信息，包括图片、标题、跳转链接、排序等",
+        "operationId": "updateBanner",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Banner"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/banners/toggle/{id}": {
+      "put": {
+        "tags": [
+          "轮播图管理"
+        ],
+        "summary": "切换轮播图状态",
+        "description": "启用或禁用指定的轮播图，禁用后不会在前台显示",
+        "operationId": "toggleBannerStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "轮播图ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "description": "是否启用，true为启用，false为禁用",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/add": {
+      "post": {
+        "tags": [
+          "公告管理"
+        ],
+        "summary": "发布新公告",
+        "description": "创建并发布新的系统公告",
+        "operationId": "addNotice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Notice"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/banners/upload-image": {
+      "post": {
+        "tags": [
+          "轮播图管理"
+        ],
+        "summary": "上传轮播图图片",
+        "description": "将图片文件上传到MinIO服务器，返回可访问的图片URL",
+        "operationId": "uploadBannerImage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "要上传的图片文件，支持jpg、png、gif等格式，大小限制5MB",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/banners/add": {
+      "post": {
+        "tags": [
+          "轮播图管理"
+        ],
+        "summary": "添加轮播图",
+        "description": "创建新的轮播图，需要提供图片URL、标题、跳转链接等信息",
+        "operationId": "addBanner",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Banner"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/{id}": {
+      "get": {
+        "tags": [
+          "公告管理"
+        ],
+        "summary": "根据ID获取公告",
+        "description": "根据公告ID获取单个公告的详细信息",
+        "operationId": "getNoticeById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "公告ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultNotice"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/list": {
+      "get": {
+        "tags": [
+          "公告管理"
+        ],
+        "summary": "获取所有公告",
+        "description": "获取所有公告列表，包括启用和禁用的，供管理后台使用",
+        "operationId": "getAllNotices",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListNotice"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/latest": {
+      "get": {
+        "tags": [
+          "公告管理"
+        ],
+        "summary": "获取最新公告",
+        "description": "获取最新发布的公告列表，用于首页推荐展示",
+        "operationId": "getLatestNotices",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "限制数量",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            },
+            "example": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListNotice"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/active": {
+      "get": {
+        "tags": [
+          "公告管理"
+        ],
+        "summary": "获取启用的公告",
+        "description": "获取状态为启用的公告列表，供前台首页展示使用",
+        "operationId": "getActiveNotices",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListNotice"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/banners/{id}": {
+      "get": {
+        "tags": [
+          "轮播图管理"
+        ],
+        "summary": "根据ID获取轮播图",
+        "description": "根据轮播图ID获取单个轮播图的详细信息",
+        "operationId": "getBannerById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "轮播图ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultBanner"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/banners/list": {
+      "get": {
+        "tags": [
+          "轮播图管理"
+        ],
+        "summary": "获取所有轮播图",
+        "description": "获取所有轮播图列表，包括启用和禁用的，供管理后台使用",
+        "operationId": "getAllBanners",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListBanner"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/banners/active": {
+      "get": {
+        "tags": [
+          "轮播图管理"
+        ],
+        "summary": "获取启用的轮播图",
+        "description": "获取状态为启用的轮播图列表，供前台首页展示使用",
+        "operationId": "getActiveBanners",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListBanner"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/delete/{id}": {
+      "delete": {
+        "tags": [
+          "公告管理"
+        ],
+        "summary": "删除公告",
+        "description": "根据ID删除指定的公告",
+        "operationId": "deleteNotice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "公告ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/banners/delete/{id}": {
+      "delete": {
+        "tags": [
+          "轮播图管理"
+        ],
+        "summary": "删除轮播图",
+        "description": "根据ID删除指定的轮播图",
+        "operationId": "deleteBanner",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "轮播图ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultString"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Notice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "description": "公告标题",
+            "example": "系统维护通知"
+          },
+          "content": {
+            "type": "string",
+            "description": "公告内容详情",
+            "example": "系统将于今晚22:00-24:00进行维护升级，期间无法访问，请合理安排考试时间..."
+          },
+          "type": {
+            "type": "string",
+            "description": "公告类型",
+            "example": "SYSTEM",
+            "enum": [
+              "SYSTEM",
+              "FEATURE",
+              "NOTICE"
+            ]
+          },
+          "priority": {
+            "type": "integer",
+            "description": "优先级级别",
+            "format": "int32",
+            "example": 1,
+            "enum": [
+              0,
+              1,
+              2
+            ]
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "是否启用显示",
+            "example": true
+          }
+        },
+        "description": "系统公告信息"
+      },
+      "ResultString": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "string",
+            "description": "响应数据，具体的业务数据内容"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "Banner": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "主键",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "修改时间",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "description": "轮播图标题",
+            "example": "智能考试系统介绍"
+          },
+          "description": {
+            "type": "string",
+            "description": "轮播图描述内容",
+            "example": "基于AI技术的智能考试平台，支持在线考试、智能组卷等功能"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "轮播图片URL地址",
+            "example": "https://example.com/images/banner1.jpg"
+          },
+          "linkUrl": {
+            "type": "string",
+            "description": "点击跳转链接，可选",
+            "example": "https://example.com/about"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "排序顺序，数字越小越靠前",
+            "format": "int32",
+            "example": 1
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "是否启用显示",
+            "example": true
+          }
+        },
+        "description": "轮播图信息"
+      },
+      "ResultNotice": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Notice"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultListNotice": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "响应数据，具体的业务数据内容",
+            "items": {
+              "$ref": "#/components/schemas/Notice"
+            }
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultBanner": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Banner"
+          }
+        },
+        "description": "统一API响应结果"
+      },
+      "ResultListBanner": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码",
+            "format": "int32",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              401,
+              403,
+              404,
+              500
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息，成功时描述操作结果，失败时描述错误原因",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "响应数据，具体的业务数据内容",
+            "items": {
+              "$ref": "#/components/schemas/Banner"
+            }
+          }
+        },
+        "description": "统一API响应结果"
+      }
+    }
+  }
+}
